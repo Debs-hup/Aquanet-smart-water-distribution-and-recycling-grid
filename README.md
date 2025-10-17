@@ -1,5 +1,5 @@
 # Aquanet-smart-water-distribution-and-recycling-grid
-1. The Project Description
+🎯Project Overview
 
 Aquanet is a distributed smart water management system designed to help collect, monitor, and distribute water more efficiently in areas where is needed the most. The main idea is to build a network of connected devices that can gather water from different sources like rivers, boreholes, rainwater tanks, or underground wells and make it available in areas lacking this facility.
 
@@ -13,7 +13,7 @@ With AquaNet, the goal is to create a flexible and reliable water grid that reac
 
 ⸻
 
-💧 2. Problem Statement
+💧 Problem Statement
 
 Many cities and rural areas still face serious problems when it comes to water distribution.
 Some regions have plenty of water sources, while others lack this water resources with constant shortages. In several cases:
@@ -26,7 +26,7 @@ These problems leads to significant water waste and some communities go without 
 
 ⸻
 
-⚙️ 3. Solution Statement
+⚙️ Solution Statement
 
 AquaNet provides a practical solution by combining IoT technology and distributed computing.
 The system will connect to multiple water sources, local controllers, and delivery units into one organized network.
@@ -42,3 +42,24 @@ It receives summarized data from each edge controller, monitors the overall heal
 These units receives commands from the cloud to physically transport or reroute water where it is needed, while it continuously reports their status.
 
 By distributing intelligence across the system, AquaNet avoids a single point of failure and make sure that if one part goes offline, the other one’s can still function. Over time, the collected data can also be used to predict shortages, detect contamination early, and plan future distribution more effectively.
+🧰 Technologies used
+Programming Language
+Python / Node.js
+IoT Hardware (optional)
+Raspberry Pi / ESP8266 / Arduino
+Communication Protocols
+MQTT / CoAP / gRPC / HTTP REST
+Data Storage
+MongoDB / InfluxDB / Firebase Realtime DB
+Backend Framework
+Flask / FastAPI
+Frontend Dashboard
+HTML, CSS, Bootstrap, Chart.js or Grafana
+Edge Computing Framework
+Node-RED / MicroPython
+Simulation (if hardware not used)
+Python + Docker containers or Mininet
+Version Control
+Git / GitHub
+Visualization
+Grafana / Power BI / Matplotlib
