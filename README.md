@@ -30,35 +30,46 @@ AquaNet provides a practical solution by combining IoT technology and distribute
 The system will connect to multiple water sources, local controllers, and delivery units into one organized network.
 
 Here is how it works:
+
 	1.	Smart Source Nodes:
 Using IoT sensors it collects water availability and quality data in real time and transmit it to adjacent edge controllers through lightweight communication (MQTT).
+
 	2.	Edge Controllers:
 Each edge unit manages local sources, processes data, and makes immediate decisions for instance, when to release water or when to store it for later use.
+
 	3.	Cloud Platform:
 It receives summarized data from each edge controller, monitors the overall health of the grid, and then send instructions to redistribute water between regions when one area runs low.
+
 	4.	Distribution Units:
 These units receives commands from the cloud to physically transport or reroute water where it is needed, while it continuously reports their status.
 
 By distributing intelligence across the system, AquaNet avoids a single point of failure and make sure that if one part goes offline, the other one’s can still function. Over time, the collected data can also be used to predict shortages, detect contamination early, and plan future distribution more effectively.
 
 🧰 Technologies used
-Programming Language
+
+1. Programming Language:
 Python / Node.js
-IoT Hardware (optional)
+
+2. IoT Hardware (optional):
 Raspberry Pi / ESP8266 / Arduino
-Communication Protocols
+
+3. Communication Protocols:
 MQTT / CoAP / gRPC / HTTP REST
-Data Storage
+
+4. Data Storage:
 MongoDB / InfluxDB / Firebase Realtime DB
-Backend Framework
+
+5. Backend Framework:
 Flask / FastAPI
-Frontend Dashboard
+
+6. Frontend Dashboard:
 HTML, CSS, Bootstrap, Chart.js or Grafana
-Edge Computing Framework
+
+7. Edge Computing Framework:
 Node-RED / MicroPython
-Simulation (if hardware not used)
+
+8. Simulation (if hardware not used):
 Python + Docker containers or Mininet
-Version Control
+
+9. Version Control:
 Git / GitHub
-Visualization
-Grafana / Power BI / Matplotlib
