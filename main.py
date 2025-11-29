@@ -1,47 +1,103 @@
-from storage_virtual_network import StorageVirtualNetwork
+import argparse
+import time
 from storage_virtual_node import StorageVirtualNode
+from storage_virtual_network import StorageVirtualNetwork
 
-# Create network
-network = StorageVirtualNetwork()
-
-# Create nodes
-node1 = StorageVirtualNode("node1", cpu_capacity=4, memory_capacity=16, storage_capacity=500, bandwidth=1000)
-node2 = StorageVirtualNode("node2", cpu_capacity=8, memory_capacity=32, storage_capacity=1000, bandwidth=2000)
-
-# Add nodes to network
-network.add_node(node1)
-network.add_node(node2)
-
-# Connect nodes with 1Gbps link
-network.connect_nodes("node1", "node2", bandwidth=1000)
-
-# Initiate file transfer (100MB file from node1 to node2)
-transfer = network.initiate_file_transfer(
-    source_node_id="node1",
-    target_node_id="node2",
-    file_name="large_dataset.zip",
-    file_size=100 * 1024 * 1024  # 100MB
-)
-
-if transfer:
-    print(f"Transfer initiated: {transfer.file_id}")
-    
-    # Process transfer in chunks
-    while True:
-        chunks_done, completed = network.process_file_transfer(
-            source_node_id="node1",
-            target_node_id="node2",
-            file_id=transfer.file_id,
-            chunks_per_step=3  # Process 3 chunks at a time
+def run_node(node_id, cpu, memory, storage, bandwidth, network_host, network_port):
+    try:
+        print(f"Starting node {node_id}...")
+        node = StorageVirtualNode(
+            node_id=node_id,
+            cpu_capacity=cpu,
+            memory_capacity=memory,
+            storage_capacity=storage,
+            bandwidth=bandwidth,
+            network_host=network_host,
+            network_port=network_port
         )
         
-        print(f"Transferred {chunks_done} chunks, completed: {completed}")
-        
-        if completed:
-            print("Transfer completed successfully!")
-            break
-            
-        # Get network stats
-        stats = network.get_network_stats()
-        print(f"Network utilization: {stats['bandwidth_utilization']:.2f}%")
-        print(f"Storage utilization on node2: {node2.get_storage_utilization()['utilization_percent']:.2f}%")
+        print(f"Node {node_id} running. Press Ctrl+C to stop.")
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        node.shutdown()
+    except Exception as e:
+        print(f"Node startup failed: {e}")
+
+def run_network(host, port):
+    try:
+        print("🌐 Starting Cloud Storage Controller...")
+        print(f"📡 Architecture: Node ↔ Cloud ↔ Node")
+        print(f"🔗 Listening on {host}:{port}")
+        network = StorageVirtualNetwork(host=host, port=port)
+
+        print(f"\n✅ Cloud Storage Controller is running!")
+        print(f"📊 Waiting for nodes to connect...")
+        print(f"🛑 Press Ctrl+C to stop the cloud controller")
+        print("=" * 60)
+
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        print(f"\n🛑 Shutting down Cloud Storage Controller...")
+        network.shutdown()
+        print("✅ Cloud Controller shutdown complete")
+    except Exception as e:
+        print(f"❌ Cloud Controller startup failed: {e}")
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='Distributed Cloud Storage System')
+    parser.add_argument('--node', action='store_true', help='Run as a storage node (deprecated - use interactive_node.py)')
+    parser.add_argument('--network', action='store_true', help='Run as cloud storage controller')
+    parser.add_argument('--node-id', type=str, help='Node ID (deprecated)')
+    parser.add_argument('--cpu', type=int, default=4, help='CPU capacity (deprecated)')
+    parser.add_argument('--memory', type=int, default=16, help='Memory capacity (GB) (deprecated)')
+    parser.add_argument('--storage', type=int, default=500, help='Storage capacity (GB) (deprecated)')
+    parser.add_argument('--bandwidth', type=int, default=1000, help='Bandwidth (Mbps) (deprecated)')
+    parser.add_argument('--network-host', type=str, default='localhost', help='Network controller host (deprecated)')
+    parser.add_argument('--network-port', type=int, default=5000, help='Network controller port')
+    parser.add_argument('--host', type=str, default='0.0.0.0', help='Host to bind to (for cloud controller)')
+
+    args = parser.parse_args()
+
+    if args.network:
+        run_network(args.host, args.network_port)
+    elif args.node and args.node_id:
+        print("⚠️  WARNING: Direct node mode is deprecated!")
+        print("💡 Please use: python interactive_node.py --node-id <your_node_id>")
+        print("🎯 This provides a better interactive experience with menus and commands")
+        print()
+        response = input("Continue with deprecated mode? (y/N): ").strip().lower()
+        if response == 'y':
+            run_node(
+                args.node_id,
+                args.cpu,
+                args.memory,
+                args.storage,
+                args.bandwidth,
+                args.network_host,
+                args.network_port
+            )
+        else:
+            print("👍 Use interactive_node.py instead!")
+    else:
+        print("🌐 Distributed Cloud Storage System")
+        print("=" * 40)
+        print("📋 Usage:")
+        print("  🔧 Start Cloud Controller:")
+        print("     python main.py --network")
+        print()
+        print("  🖥️  Start Interactive Node:")
+        print("     python interactive_node.py --node-id node1")
+        print()
+        print("  🌐 gRPC Version (Recommended):")
+        print("     python grpc_cloud_controller.py")
+        print("     python grpc_interactive_node.py --node-id node1")
+        print()
+        print("🔄 Features:")
+        print("  • Automatic file synchronization")
+        print("  • Files removed when nodes go offline")
+        print("  • Real-time cloud file list updates")
+        print("  • Node ↔ Cloud ↔ Node architecture")
+        print()
+        print("💡 Start the cloud controller first, then connect nodes!")
