@@ -1,0 +1,112 @@
+syntax = "proto3";
+
+package cloud;
+
+// --- Auth & User ---
+service AuthService {
+  rpc Signup(SignupRequest) returns (SignupResponse);
+  rpc Login(LoginRequest) returns (LoginResponse);
+  rpc VerifyOTP(VerifyOTPRequest) returns (VerifyOTPResponse);
+}
+
+// --- File operations ---
+service FileService {
+  // client-streaming upload (init + chunks)
+  rpc Upload(stream UploadChunk) returns (UploadResponse);
+
+  // server-streaming download
+  rpc DownloadFile(DownloadFileRequest) returns (stream DownloadChunk);
+
+  // soft-delete -> move to trash (does not permanently remove)
+  rpc DeleteFile(DeleteFileRequest) returns (DeleteFileResponse);
+
+  // restore a trashed file
+  rpc RestoreFile(RestoreFileRequest) returns (RestoreFileResponse);
+
+  rpc ListFiles(ListFilesRequest) returns (ListFilesResponse);
+}
+
+// --- Node management (gRPC) ---
+service NodeService {
+  rpc RegisterNode(RegisterNodeRequest) returns (RegisterNodeResponse);
+  rpc Heartbeat(HeartbeatRequest) returns (HeartbeatResponse);
+  rpc GetNodes(GetNodesRequest) returns (GetNodesResponse);
+  rpc RemoveNode(RemoveNodeRequest) returns (RemoveNodeResponse);
+}
+
+// --- Admin service (gRPC admin ops) ---
+service AdminService {
+  rpc ListUsers(ListUsersRequest) returns (ListUsersResponse);
+  rpc DeleteUser(DeleteUserAdminRequest) returns (DeleteUserAdminResponse);
+  rpc UpdateQuota(UpdateQuotaRequest) returns (UpdateQuotaResponse);
+  // admin purge a file immediately (force permanent delete)
+  rpc PurgeFile(PurgeFileRequest) returns (PurgeFileResponse);
+}
+
+/* --- Messages --- */
+
+message SignupRequest { string email = 1; string password = 2; string full_name = 3; }
+message SignupResponse { int64 user_id = 1; string message = 2; }
+
+message LoginRequest { string email = 1; string password = 2; }
+message LoginResponse { int64 user_id = 1; bool otp_sent = 2; string message = 3; }
+
+message VerifyOTPRequest { int64 user_id = 1; string otp = 2; }
+message VerifyOTPResponse { bool ok = 1; string session_token = 2; }
+
+/* Upload */
+message UploadInit { int64 user_id = 1; string filename = 2; int64 total_bytes = 3; }
+message UploadChunk {
+  UploadInit init = 1;
+  bytes chunk_data = 2;
+}
+message UploadResponse { bool ok = 1; string message = 2; int64 file_id = 3; }
+
+/* Download */
+message DownloadFileRequest { int64 user_id = 1; int64 file_id = 2; }
+message DownloadChunk { bytes chunk_data = 1; }
+
+/* Delete / Restore */
+message DeleteFileRequest { int64 user_id = 1; int64 file_id = 2; }
+message DeleteFileResponse { bool ok = 1; string message = 2; }
+
+message RestoreFileRequest { int64 user_id = 1; int64 file_id = 2; }
+message RestoreFileResponse { bool ok = 1; string message = 2; }
+
+/* List files */
+message ListFilesRequest { int64 user_id = 1; }
+message FileMeta {
+  int64 id = 1; string filename = 2; int64 size_bytes = 3; string created_at = 4; bool deleted = 5;
+}
+message ListFilesResponse { repeated FileMeta files = 1; }
+
+/* Node messages */
+message RegisterNodeRequest { string name = 1; string address = 2; int64 capacity = 3; }
+message RegisterNodeResponse { int64 node_id = 1; string message = 2; }
+
+message HeartbeatRequest { int64 node_id = 1; int64 used_bytes = 2; string status = 3; }
+message HeartbeatResponse { bool ok = 1; string message = 2; }
+
+message GetNodesRequest {}
+message NodeInfo {
+  int64 id = 1; string name = 2; string address = 3; int64 capacity = 4; int64 used_bytes = 5; string last_heartbeat = 6; string status = 7;
+}
+message GetNodesResponse { repeated NodeInfo nodes = 1; }
+
+message RemoveNodeRequest { int64 node_id = 1; }
+message RemoveNodeResponse { bool ok = 1; string message = 2; }
+
+/* Admin messages */
+message ListUsersRequest {}
+message UserInfo { int64 id = 1; string email = 2; string full_name = 3; int64 quota_bytes = 4; int64 used_bytes = 5; string created_at = 6;}
+message ListUsersResponse { repeated UserInfo users = 1; }
+
+message DeleteUserAdminRequest { int64 user_id = 1; }
+message DeleteUserAdminResponse { bool ok = 1; string message = 2; }
+
+message UpdateQuotaRequest { int64 user_id = 1; int64 new_quota_bytes = 2; }
+message UpdateQuotaResponse { bool ok = 1; string message = 2; }
+
+/* Purge (admin) */
+message PurgeFileRequest { int64 user_id = 1; int64 file_id = 2; }
+message PurgeFileResponse { bool ok = 1; string message = 2; }
