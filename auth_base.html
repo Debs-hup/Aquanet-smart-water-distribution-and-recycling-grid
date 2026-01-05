@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>{% block title %}AquaNet — Auth{% endblock %}</title>
+    <style>
+        :root{
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #202124;
+            --muted: #6b7280;
+            --accent-start: #7c3aed;
+            --accent-end: #6d28d9;
+            --border: #e6e9ee;
+        }
+        *{box-sizing:border-box}
+        body{font-family: 'Segoe UI', Roboto, system-ui, Arial; background: linear-gradient(135deg,var(--bg),#f1f3f4); color:var(--text); margin:0; min-height:100vh}
+        a{color:var(--accent-start); text-decoration:none}
+    </style>
+</head>
+<body>
+    {% block body %}{% endblock %}
+</body>
+</html>

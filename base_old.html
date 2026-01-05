@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}AquaNet Cloud Storage{% endblock %}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Roboto', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f8f9fa;
+            color: #202124;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        /* Top Header */
+        .header {
+            background: white;
+            border-bottom: 1px solid #dadce0;
+            padding: 0.75rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .logo {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #5f35a9;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .search-bar {
+            background: #f1f3f4;
+            border: 1px solid transparent;
+            border-radius: 24px;
+            padding: 0.5rem 1rem;
+            width: 400px;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+        }
+
+        .search-bar:focus {
+            outline: none;
+            background: white;
+            border-color: #dadce0;
+            box-shadow: 0 1px 6px rgba(95, 53, 169, 0.2);
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #7c3aed, #6d28d9);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* Main Layout */
+        .main-layout {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 256px;
+            background: white;
+            border-right: 1px solid #dadce0;
+            padding: 1rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .new-button {
+            background: linear-gradient(135deg, #7c3aed, #6d28d9);
+            color: white;
+            border: none;
+            border-radius: 24px;
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            transition: all 0.3s;
+            width: 100%;
+        }
+
+        .new-button:hover {
+            box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .nav-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .nav-section-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            color: #9aa0a6;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            padding: 0 1rem;
+        }
+
+        .nav-item {
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.25rem;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            color: #202124;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transition: all 0.2s;
+            font-size: 0.95rem;
+        }
+
+        .nav-item:hover {
+            background: #f1f3f4;
+            color: #5f35a9;
+        }
+
+        .nav-item.active {
+            background: #e8e0ff;
+            color: #5f35a9;
+            font-weight: 600;
+        }
+
+        .nav-item-icon {
+            font-size: 1.25rem;
+            width: 24px;
+            text-align: center;
+        }
+
+        .storage-info {
+            margin-top: auto;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+            font-size: 0.875rem;
+        }
+
+        .storage-label {
+            color: #9aa0a6;
+            margin-bottom: 0.5rem;
+        }
+
+        .storage-bar {
+            background: #dadce0;
+            height: 8px;
+            border-radius: 4px;
+            margin-bottom: 0.5rem;
+            overflow: hidden;
+        }
+
+        .storage-used {
+            background: linear-gradient(90deg, #7c3aed, #6d28d9);
+            height: 100%;
+            width: 35%;
+        }
+
+        .storage-text {
+            color: #5f35a9;
+            font-weight: 500;
+        }
+
+        /* Content Area */
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 2rem;
+        }
+
+        /* Alerts */
+        .alert {
+            padding: 1rem 1.5rem;
+            margin-bottom: 1.5rem;
+            border-radius: 8px;
+            border-left: 4px solid;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(-20px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .alert-success {
+            background: #f0fdf4;
+            color: #166534;
+            border-color: #22c55e;
+        }
+
+        .alert-danger {
+            background: #fef2f2;
+            color: #991b1b;
+            border-color: #ef4444;
+        }
+
+        /* Forms */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #5f35a9;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        input[type="number"],
+        input[type="file"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid #dadce0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        input[type="password"]:focus,
+        input[type="number"]:focus,
+        input[type="file"]:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: #7c3aed;
+            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+        }
+
+        /* Buttons */
+        button, .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-block;
+            text-decoration: none;
+            text-align: center;
+        }
+
+        .btn-primary, button {
+            background: linear-gradient(135deg, #7c3aed, #6d28d9);
+            color: white;
+        }
+
+        .btn-primary:hover, button:hover {
+            box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+        }
+
+        .btn-secondary {
+            background: #f1f3f4;
+            color: #5f35a9;
+        }
+
+        .btn-secondary:hover {
+            background: #e8e0ff;
+        }
+
+        .btn-danger {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .btn-danger:hover {
+            background: #f5c6cb;
+        }
+
+        .btn-sm {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+        }
+
+        /* Headings */
+        h1, h2, h3 {
+            color: #202124;
+            margin-bottom: 1rem;
+        }
+
+        h1 {
+            font-size: 2rem;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+        }
+
+        h3 {
+            font-size: 1.25rem;
+        }
+
+        /* Links */
+        a {
+            color: #5f35a9;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        a:hover {
+            color: #7c3aed;
+            text-decoration: underline;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #dadce0;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #9aa0a6;
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Header -->
+    {% if session.get('email') %}
+    <div class="header">
+        <div class="header-left">
+            <a href="{{ url_for('dashboard') }}" class="logo">🌐 AquaNet</a>
+            <input type="text" class="search-bar" placeholder="Search in AquaNet" />
+        </div>
+        <div class="header-right">
+            <div class="user-menu">
+                <span style="color: #9aa0a6;">⚙️</span>
+                <div class="user-avatar" title="{{ session.get('email') }}">
+                    {{ session.get('email')[0].upper() }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Layout -->
+    <div class="main-layout">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <button class="new-button" onclick="document.getElementById('upload-input').click();">
+                ➕ New
+            </button>
+
+            <div class="nav-section">
+                <a href="{{ url_for('dashboard') }}" class="nav-item active">
+                    <span class="nav-item-icon">🏠</span>
+                    <span>Home</span>
+                </a>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Collections</div>
+                <a href="#" class="nav-item">
+                    <span class="nav-item-icon">📍</span>
+                    <span>Recent</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <span class="nav-item-icon">⭐</span>
+                    <span>Starred</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <span class="nav-item-icon">🗑️</span>
+                    <span>Trash</span>
+                </a>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Account</div>
+                <a href="/logout" class="nav-item">
+                    <span class="nav-item-icon">🚪</span>
+                    <span>Logout</span>
+                </a>
+            </div>
+
+            <div class="storage-info">
+                <div class="storage-label">Storage</div>
+                <div class="storage-bar">
+                    <div class="storage-used"></div>
+                </div>
+                <div class="storage-text">
+                    {{ (used / (1024*1024*1024))|round(2) }} GB of {{ (quota / (1024*1024*1024))|round(2) }} GB
+                </div>
+            </div>
+        </div>
+
+        <!-- Content Area -->
+        <div class="content">
+            {% with msgs = get_flashed_messages() %}
+                {% if msgs %}
+                    {% for m in msgs %}
+                        <div class="alert alert-success">✓ {{ m }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            {% block body %}{% endblock %}
+        </div>
+    </div>
+
+    <!-- Hidden file input for upload -->
+    <input type="file" id="upload-input" style="display: none;" />
+    {% endif %}
+
+    <!-- For non-authenticated pages -->
+    {% if not session.get('email') %}
+        {% with msgs = get_flashed_messages() %}
+            {% if msgs %}
+                <div style="padding: 2rem; max-width: 1200px; margin: 0 auto; width: 100%;">
+                    {% for m in msgs %}
+                        <div class="alert alert-success">✓ {{ m }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        {% block body %}{% endblock %}
+    {% endif %}
+</body>
+</html>
