@@ -1,0 +1,329 @@
+{% extends "base.html" %}
+{% block body %}
+<style>
+    .file-toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+
+    .toolbar-left {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+    }
+
+    .toolbar-buttons {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .toolbar-buttons button {
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        border: 1px solid #dadce0;
+        background: white;
+        color: #5f35a9;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-weight: 500;
+    }
+
+    .toolbar-buttons button:hover {
+        background: #f1f3f4;
+    }
+
+    .toolbar-buttons button.active {
+        background: #e8e0ff;
+    }
+
+    .file-table {
+        background: white;
+        border-radius: 8px;
+        overflow: hidden;
+        border: 1px solid #dadce0;
+    }
+
+    .file-table table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .file-table thead {
+        background: #f8f9fa;
+        border-bottom: 1px solid #dadce0;
+    }
+
+    .file-table th {
+        padding: 1rem;
+        text-align: left;
+        font-weight: 600;
+        color: #5f35a9;
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        cursor: pointer;
+        user-select: none;
+    }
+
+    .file-table th:hover {
+        background: #f1f3f4;
+    }
+
+    .file-table td {
+        padding: 1rem;
+        border-bottom: 1px solid #f1f3f4;
+    }
+
+    .file-table tbody tr {
+        transition: background 0.2s;
+    }
+
+    .file-table tbody tr:hover {
+        background: #f8f9fa;
+    }
+
+    .file-name {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        color: #5f35a9;
+        font-weight: 500;
+    }
+
+    .file-name:hover {
+        text-decoration: underline;
+    }
+
+    .file-icon {
+        font-size: 1.5rem;
+    }
+
+    .file-size {
+        color: #9aa0a6;
+        font-size: 0.875rem;
+    }
+
+    .file-date {
+        color: #9aa0a6;
+        font-size: 0.875rem;
+    }
+
+    .file-actions {
+        display: flex;
+        gap: 0.5rem;
+        justify-content: flex-end;
+    }
+
+    .file-action-btn {
+        padding: 0.4rem 0.8rem;
+        border: none;
+        border-radius: 4px;
+        background: transparent;
+        color: #5f35a9;
+        cursor: pointer;
+        font-size: 0.875rem;
+        transition: all 0.2s;
+    }
+
+    .file-action-btn:hover {
+        background: #e8e0ff;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: #9aa0a6;
+    }
+
+    .empty-state-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    .upload-dropzone {
+        border: 2px dashed #dadce0;
+        border-radius: 8px;
+        padding: 3rem;
+        text-align: center;
+        background: white;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .upload-dropzone:hover {
+        border-color: #7c3aed;
+        background: #f8f7ff;
+    }
+
+    .upload-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+
+    .upload-text {
+        color: #202124;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .upload-subtext {
+        color: #9aa0a6;
+        font-size: 0.875rem;
+    }
+
+    .quota-bar-container {
+        background: white;
+        padding: 2rem;
+        border-radius: 8px;
+        margin-bottom: 2rem;
+        border: 1px solid #dadce0;
+    }
+
+    .quota-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .quota-text {
+        color: #5f35a9;
+        font-weight: 500;
+    }
+
+    .quota-bar {
+        background: #dadce0;
+        height: 12px;
+        border-radius: 6px;
+        overflow: hidden;
+        margin-bottom: 0.5rem;
+    }
+
+    .quota-fill {
+        background: linear-gradient(90deg, #7c3aed, #6d28d9);
+        height: 100%;
+        width: 35%;
+        transition: width 0.3s;
+    }
+
+    .quota-details {
+        font-size: 0.875rem;
+        color: #9aa0a6;
+    }
+
+    .upgrade-button {
+        background: linear-gradient(135deg, #7c3aed, #6d28d9);
+        color: white;
+        border: none;
+        border-radius: 24px;
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .upgrade-button:hover {
+        box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+    }
+</style>
+
+<!-- Quota Bar -->
+<div class="quota-bar-container">
+    <div class="quota-header">
+        <span class="quota-text">Storage Used</span>
+        <form method="post" action="{{ url_for('upgrade_quota') }}" style="display: inline;">
+            <button type="submit" class="upgrade-button">⬆️ Upgrade Storage</button>
+        </form>
+    </div>
+    {% set percent = ((used / quota) * 100)|round(1) if quota > 0 else 0 %}
+    <div class="quota-bar">
+        <div class="quota-fill" style="width: {{ percent }}%;"></div>
+    </div>
+    <div class="quota-details">
+        <strong>{{ (used / (1024*1024*1024))|round(2) }} GB</strong> of <strong>{{ (quota / (1024*1024*1024))|round(2) }} GB</strong> used ({{ percent }}%)
+    </div>
+</div>
+
+<!-- File Toolbar -->
+<div class="file-toolbar">
+    <div class="toolbar-left">
+        <div class="toolbar-buttons">
+            <button class="active">📋 List</button>
+            <button>🔲 Grid</button>
+        </div>
+    </div>
+</div>
+
+<!-- Files Table -->
+{% if files %}
+<div class="file-table">
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 50%;">Name</th>
+                <th style="width: 20%;">Size</th>
+                <th style="width: 20%;">Modified</th>
+                <th style="width: 10%; text-align: right;">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for f in files %}
+            <tr>
+                <td>
+                    <div class="file-name">
+                        <span class="file-icon">📄</span>
+                        <span>{{ f.filename }}</span>
+                    </div>
+                </td>
+                <td>
+                    <span class="file-size">{{ (f.size_bytes / (1024*1024))|round(2) }} MB</span>
+                </td>
+                <td>
+                    <span class="file-date">
+                        {% if f.created_at %}
+                            {{ f.created_at.strftime('%b %d, %Y') }}
+                        {% else %}
+                            Recently
+                        {% endif %}
+                    </span>
+                </td>
+                <td>
+                    <div class="file-actions">
+                        <a href="{{ url_for('download_file', file_id=f.id) }}" class="file-action-btn" title="Download">
+                            ⬇️ Download
+                        </a>
+                        <a href="{{ url_for('delete_file', file_id=f.id) }}" class="file-action-btn" title="Delete" onclick="return confirm('Move to trash?')">
+                            🗑️ Delete
+                        </a>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<!-- Empty State -->
+<div class="upload-dropzone" onclick="document.getElementById('upload-input').click();">
+    <div class="upload-icon">📭</div>
+    <div class="upload-text">No files yet</div>
+    <div class="upload-subtext">Click here or use the "New" button to upload your first file</div>
+</div>
+{% endif %}
+
+<!-- Hidden Upload Form -->
+<form id="upload-form" method="post" action="{{ url_for('upload') }}" enctype="multipart/form-data" style="display: none;">
+    <input type="file" id="upload-input" name="file" onchange="document.getElementById('upload-form').submit();" />
+</form>
+
+<script>
+    // Handle upload on sidebar "New" button click
+    document.getElementById('upload-input').addEventListener('change', function() {
+        if (this.files.length > 0) {
+            document.getElementById('upload-form').submit();
+        }
+    });
+</script>
+{% endblock %}
